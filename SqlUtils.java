@@ -9,7 +9,7 @@ public class SqlUtils {
         String url = "jdbc:sqlite:" + DBName;
         conn = null;
         try{
-            // Class.forName(DRIVER);
+            Class.forName(DRIVER);
             conn = DriverManager.getConnection(url);
             if(conn == null){
                 System.err.println("Database connection could not be established, exiting...");
@@ -20,6 +20,7 @@ public class SqlUtils {
             System.exit(1);
         } catch(Exception e){
             System.err.println(e.getMessage());
+            System.exit(1);
         }
     }
 
@@ -28,7 +29,7 @@ public class SqlUtils {
             ResultSet rs = stmt.executeQuery();
             ResultSetMetaData meta = rs.getMetaData();
             int cols = meta.getColumnCount();
-            for(int i = 0; i < cols; i++){
+            for(int i = 1; i < cols; i++){
                 String val = meta.getColumnName(i);
                 System.out.println(val);
                 if(i < cols)
