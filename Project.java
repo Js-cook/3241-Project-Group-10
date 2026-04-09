@@ -274,6 +274,68 @@ public class Project{
         }
     }
 
+    public static void rentingCheckoutsReport(int customerId){
+        try {
+            String sql = "SELECT Cust_ID, Rob_Serial_Num, Rent_Start_Date, Rent_End_Date FROM Customer JOIN Rental ON Cust_ID = Rent_Cust_Ref JOIN Robot ON Rob_Serial_Num = Rent_Item_SN WHERE Cust_ID = ?;";
+            PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            stmt.setInt(1, customerId);
+            SqlUtils.sqlSelectQuery(stmt);
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void popularRobotReport(){
+        try{
+            String sql = "SELECT rb.Rob_Serial_Num, rb.Rob_Model_Ref, COUNT(*) AS num_rentals, SUM(JULIANDAY(rt.Rent_End_Date)- ULIANDAY(rt.Rent_Start_Date)) AS total_rented_days FROM Robot AS rb JOIN Rent AS rt ON rt.Rent_Item_SN = rb.Rob_Serial_Num GROUP BY rb.Rob_Serial_Num, rb.Rob_Model_Ref ORDER BY total_rented_days DESC; ";
+            PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            SqlUtils.sqlSelectQuery(stmt);
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void popularManufacturerReport(){
+        try{
+            String sql = "SELECT Mfr_Name FROM Rental JOIN Robot ON  Rent_Item_SN = Rob_Serial_Num JOIN Manufacturer ON Rob_Mfr_Ref= Mfr_Name GROUP BY Mfr_Name ORDER BY COUNT(Rent_ID) DESC LIMIT 1;";
+            PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            SqlUtils.sqlSelectQuery(stmt);
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void popularDriverlessCarReport(){
+         try{
+            String sql = "SELECT Veh_Serial_Num, SUM(Cust_Facility_Distance)*2 FROM Driverless_Vehicle LEFT JOIN Rental ON Veh_Serial_Num = Rent_Veh_Ref LEFT JOIN Customer ON Rent_Cust_Ref = Cust_ID GROUP BY Veh_Serial_Num ORDER BY COUNT(Rent_ID) DESC LIMIT 1;";
+            PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            SqlUtils.sqlSelectQuery(stmt);
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void robotsCheckedOutReport(){
+        try{
+            String sql = "SELECT Cust_ID, Cust_First_Name, Cust_Last_Name, cc.Num_Rentals FROM Customer JOIN (SELECT Rent_Cust_Ref, COUNT(Rent_Item_SN) AS Num_Rentals FROM Rental GROUP BY Rent_Cust_Ref) AS cc ON Cust_ID = cc.Rent_Cust_Ref WHERE cc.Num_Rentals = (SELECT MAX(Num_Rentals) FROM (SELECT COUNT(Rent_Item_SN) AS Num_Rentals FROM Rental GROUP BY Rent_Cust_Ref) AS Counts); ";
+            PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            SqlUtils.sqlSelectQuery(stmt);
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void robotsByType(int year){
+        try {
+            String sql = "SELECT Rob_Mfr_Ref, RM_Descriptive_Name, Rob_Year FROM Robot JOIN Robot_Model ON Rob_Model_Ref = RM_Model_ID WHERE AND Rob_Year < ?;";
+            PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            stmt.setInt(1, year);
+            SqlUtils.sqlSelectQuery(stmt);
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
     public static void main(String[] args) {
         // db_utils = new SqlUtils("RobotCompany.db"); assert(db_utils != null); assert(db_utils.conn != null);
 
@@ -553,7 +615,55 @@ public class Project{
                             break;
                     }
                     break;
+                case 4:
+                    System.out.println("\n--- Reports ---");
+                    System.out.println("1. Renting Checkouts");
+                    System.out.println("2. Popular Robot");
+                    System.out.println("3. Popular Manufacturer");
+                    System.out.println("4. Popular Driverless Car");
+                    System.out.println("5. Robots Checked Out");
+                    System.out.println("6. Robots by Type");
+                    int reportSelection = scanner.nextInt();
+                    scanner.nextLine();
 
+                    switch(reportSelection){
+                        case 1:
+                            System.out.println("\n--- Renting Checkouts Report ---");
+                            System.out.println("Enter Customer ID:");
+                            int customerId = scanner.nextInt();
+
+                            rentingCheckoutsReport(customerId);
+                            break;
+                        case 2:
+                            // no info needed just lookup
+                            System.out.println("\n--- Popular Robot Report ---");
+                            popularRobotReport();
+                            break;
+                        case 3:
+                            // no info needed just lookup
+                            System.out.println("\n--- Popular Manufacturer Report ---");
+                            popularManufacturerReport();
+                            break;
+                        case 4:
+                            // no info needed just lookup
+                            System.out.println("\n--- Popular Driverless Car Report ---");
+                            popularDriverlessCarReport();
+                            break;
+                        case 5:
+                            // no info needed just lookup
+                            System.out.println("\n--- Robots Checked Out Report ---");
+                            robotsCheckedOutReport();
+                            break;
+                        case 6:
+                            System.out.println("\n--- Robots By Type Report ---");
+                            System.out.println("Enter Year:");
+                            int year = scanner.nextInt();
+
+                            robotsByType(year);
+                            break;
+                        default:
+                    }
+                    break;
                 case 0:
                     prompting = false;
                     System.out.println("Exiting...");
