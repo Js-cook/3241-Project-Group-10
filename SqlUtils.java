@@ -1,13 +1,15 @@
 import java.sql.*;
 
+
 public class SqlUtils {
-    public static Connection conn;
-    private static final String DRIVER = "com.mysql.jdbc.Driver";
+    public Connection conn;
+    private static final String DRIVER = "org.sqlite.JDBC";
 
     public SqlUtils(String DBName){
         String url = "jdbc:sqlite:" + DBName;
         conn = null;
         try{
+            // Class.forName(DRIVER);
             conn = DriverManager.getConnection(url);
             if(conn == null){
                 System.err.println("Database connection could not be established, exiting...");
@@ -16,6 +18,8 @@ public class SqlUtils {
         } catch(SQLException e){
             System.err.println(e.getMessage());
             System.exit(1);
+        } catch(Exception e){
+            System.err.println(e.getMessage());
         }
     }
 

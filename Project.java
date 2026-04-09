@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Comparator;
 
 public class Project{
-    static SqlUtils db_utils;
+    static SqlUtils db_utils = new SqlUtils("RobotCompany.db");
 
     static int nextFacilityId = 0;
     static int nextStaffId = 0;
@@ -50,7 +50,7 @@ public class Project{
             ps.setInt(6, Integer.parseInt(res[4].trim()));
             ps.setString(7, res[5].trim());
 
-            db_utils.sqlInsertQuery(ps);
+            SqlUtils.sqlInsertQuery(ps);
 
             // facilityEntries.add(r);
             // System.out.println("Facility created successfully with ID: " + r[0]);
@@ -99,59 +99,75 @@ public class Project{
             }
             stmt.setInt(2, facilityId);
 
-            stmt.executeUpdate();
+            SqlUtils.sqlUpdateQuery(stmt);
         } catch (SQLException e){
             System.out.println(e.getMessage());
         }
     }
 
     private static void deleteFacilityEntry(int id){
-        Object[] objToRemove = null;
-        for (Object[] objects : facilityEntries) {
-            if(((Integer)objects[0]).intValue() == id){
-                objToRemove = objects;
-            }
-        }
-
-        if(objToRemove != null){
-            facilityEntries.remove(objToRemove);
-        } else {
-            System.err.println("Unable to Remove specified Facility");
+        try{
+            String sql = "DELETE FROM Facility WHERE Fac_ID=?";
+            PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            SqlUtils.sqlUpdateQuery(stmt);
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
         }
     }
 
-    private static List<Object[]> retrieveFacilityEntry(Map<FacilityCol, Object> searchCriteria){
-        List<Object[]> results = new ArrayList<>();
-        
-        // If no criteria specified, return all entries
-        if (searchCriteria == null || searchCriteria.isEmpty()) {
-            results.addAll(facilityEntries);
-            return results;
+    private static void retrieveFacilityEntry(Map<FacilityCol, Object> searchCriteria){
+        // assert(db_utils.conn != null);
+        FacilityCol selectedCol = searchCriteria.keySet().toArray(new FacilityCol[1])[0];
+        Object val = searchCriteria.values().toArray(new Object[1])[0];
+
+        if (searchCriteria.isEmpty()) {
+            try {
+                String sql = "SELECT * FROM Facility;";
+                PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+                SqlUtils.sqlSelectQuery(stmt);
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+            return;
         }
-        
-        // Search through all entries and find matches
-        for (Object[] entry : facilityEntries) {
-            boolean matches = true;
-            
-            // Check each search criterion
-            for (Map.Entry<FacilityCol, Object> criterion : searchCriteria.entrySet()) {
-                int colIndex = criterion.getKey().ordinal();
-                Object expectedValue = criterion.getValue();
-                Object actualValue = entry[colIndex];
-                
-                // Handle different data types for comparison
-                if (!actualValue.toString().equalsIgnoreCase(expectedValue.toString())) {
-                    matches = false;
+
+        try{
+            String sql = "";
+            boolean isInt = false;
+            switch(selectedCol){
+                case ADDRESS:
+                    sql = "SELECT * FROM Facility WHERE Fac_Address=?;";
                     break;
-                }
+                case PHONE:
+                    sql = "SELECT * FROM Facility WHERE Fac_Phone=?;";
+                    break;
+                case MANAGER_NAME:
+                    sql = "SELECT * FROM Facility WHERE Fac_Manager_Name=?;";
+                    break;
+                case ROBOT_CAPACITY:
+                    sql = "SELECT * FROM Facility WHERE Fac_Robot_Capacity=?;";
+                    isInt = true;
+                    break;
+                case VEHICLE_CAPACITY:
+                    sql = "SELECT * FROM Facility WHERE Fac_Vehicle_Capacity=?;";
+                    isInt = true;
+                    break;
+                case CITY:
+                    sql = "SELECT * FROM Facility WHERE Fac_City=?;";
+                    break;
             }
+            PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            if(isInt){
+                stmt.setInt(1, (Integer) val);
+            } else {
+                stmt.setString(1, (String)val);
+            }
+            SqlUtils.sqlSelectQuery(stmt);
             
-            if (matches) {
-                results.add(entry);
-            }
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
         }
-        
-        return results;
     }
 
     private static void createStaffEntry(Scanner scanner){
@@ -162,99 +178,104 @@ public class Project{
                 System.err.println("Argument error! Expected 4 fields, got " + res.length);
                 return;
             }
-            Object[] r = {nextStaffId++, res[0].trim(), res[1].trim(), res[2].trim(), res[3].trim()};
-            staffEntries.add(r);
-            System.out.println("Staff entry created successfully with ID: " + r);
+            // Object[] r = {nextStaffId++, res[0].trim(), res[1].trim(), res[2].trim(), res[3].trim()};
+            // staffEntries.add(r);
+            // System.out.println("Staff entry created successfully with ID: " + r);
+            String sql = "INSERT INTO Staff_Member VALUES (?, ?, ?, ?, ?);";
+            PreparedStatement ps = db_utils.conn.prepareStatement(sql);
+            ps.setInt(1, nextStaffId++);
+            ps.setString(2, res[0].trim());
+            ps.setString(3, res[1].trim());
+            ps.setString(4, res[2].trim());
+            ps.setString(5, res[3].trim());
+            SqlUtils.sqlInsertQuery(ps);
         } catch (Exception e) {
             System.err.println("Argument error! " + e.getMessage());
         }
     }
 
     private static void updateStaffEntry(int staffId, Map<StaffCol, Object> updateValues){
-        Object[] entryToUpdate = null;
-        
-        // Find the entry with the given ID
-        for (Object[] entry : staffEntries) {
-            if (((Integer) entry[0]).intValue() == staffId) {
-                entryToUpdate = entry;
-                break;
+        StaffCol selectedCol = updateValues.keySet().toArray(new StaffCol[1])[0];
+        Object val = updateValues.values().toArray(new Object[1])[0];
+
+        try {
+            String sql = "";
+            switch(selectedCol){
+                case NAME:
+                    sql = "UPDATE Staff_Member SET Emp_Name=? WHERE Emp_ID=?";
+                    break;
+                case PHONE:
+                    sql = "UPDATE Staff_Member SET Emp_Phone=? WHERE Emp_ID=?";
+                    break;
+                case EMAIL:
+                    sql = "UPDATE Staff_Member SET Emp_Email=? WHERE Emp_ID=?";
+                    break;
+                case TYPE:
+                    sql = "UPDATE Staff_Member SET Emp_Type=? WHERE Emp_ID=?";
+                    break;
             }
-        }
-        
-        if (entryToUpdate != null) {
-            // Remove the old entry
-            staffEntries.remove(entryToUpdate);
-            
-            // Update the values
-            for (Map.Entry<StaffCol, Object> update : updateValues.entrySet()) {
-                int colIndex = update.getKey().ordinal();
-                entryToUpdate[colIndex] = update.getValue();
-            }
-            
-            // Add the updated entry back
-            staffEntries.add(entryToUpdate);
-            System.out.println("Staff " + staffId + " updated successfully.");
-        } else {
-            System.err.println("Staff with ID " + staffId + " not found.");
+            PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            stmt.setString(1, (String)val);
+            stmt.setInt(2, staffId);
+
+            SqlUtils.sqlUpdateQuery(stmt);
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
         }
     }
 
     private static void deleteStaffEntry(int id){
-        Object[] objToRemove = null;
-        for (Object[] objects : staffEntries) {
-            if(((Integer)objects[0]).intValue() == id){
-                objToRemove = objects;
-            }
-        }
-
-        if(objToRemove != null){
-            staffEntries.remove(objToRemove);
-            System.out.println("Staff " + id + " deleted successfully.");
-        } else {
-            System.err.println("Unable to Remove specified Staff");
+        try{
+            String sql = "DELETE FROM Staff_Member WHERE Emp_ID=?";
+            PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            SqlUtils.sqlUpdateQuery(stmt);
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
         }
     }
 
-    private static List<Object[]> retrieveStaffEntry(Map<StaffCol, Object> searchCriteria){
-        List<Object[]> results = new ArrayList<>();
-        
-        // If no criteria specified, return all entries
-        if (searchCriteria == null || searchCriteria.isEmpty()) {
-            results.addAll(staffEntries);
-            return results;
+    private static void retrieveStaffEntry(Map<StaffCol, Object> searchCriteria){
+        StaffCol selectedCol = searchCriteria.keySet().toArray(new StaffCol[1])[0];
+        Object val = searchCriteria.values().toArray(new Object[1])[0];
+
+        if (searchCriteria.isEmpty()) {
+            try {
+                String sql = "SELECT * FROM Staff_Member;";
+                PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+                SqlUtils.sqlSelectQuery(stmt);
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+            return;
         }
-        
-        // Search through all entries and find matches
-        for (Object[] entry : staffEntries) {
-            boolean matches = true;
-            
-            // Check each search criterion
-            for (Map.Entry<StaffCol, Object> criterion : searchCriteria.entrySet()) {
-                int colIndex = criterion.getKey().ordinal();
-                Object expectedValue = criterion.getValue();
-                Object actualValue = entry[colIndex];
-                
-                // Handle different data types for comparison
-                if (!actualValue.toString().equalsIgnoreCase(expectedValue.toString())) {
-                    matches = false;
+
+        try {
+            String sql = "";
+            switch(selectedCol){
+                case NAME:
+                    sql = "SELECT * FROM Staff_Member WHERE Emp_Name=?;";
                     break;
-                }
+                case PHONE:
+                    sql = "SELECT * FROM Staff_Member WHERE Emp_Phone=?;";
+                    break;
+                case EMAIL:
+                    sql = "SELECT * FROM Staff_Member WHERE Emp_Email=?;";
+                    break;
+                case TYPE:
+                    sql = "SELECT * FROM Staff_Member WHERE Emp_Type=?;";
+                    break;
             }
-            
-            if (matches) {
-                results.add(entry);
-            }
+            PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            stmt.setString(1, (String)val);
+            SqlUtils.sqlSelectQuery(stmt);
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
         }
-        
-        return results;
     }
 
     public static void main(String[] args) {
-        // Object[] ex = {1, "123 Main St.", "1234567890", "Steve", 10, 10, "Columbus"};
-        // facilityEntries.add(ex);
-        // Object[] exe = {1, "Craig", "9999999999", "craig@gmail.com", "Mechanic"};
-        // staffEntries.add(exe);
-        db_utils = new SqlUtils("RobotCompany.db");
+        // db_utils = new SqlUtils("RobotCompany.db"); assert(db_utils != null); assert(db_utils.conn != null);
 
         Boolean prompting = true;
         Scanner scanner = new Scanner(System.in);
@@ -286,7 +307,12 @@ public class Project{
                             String facilityValue = scanner.nextLine();
                             Map<FacilityCol, Object> facilityUpdates = new HashMap<>();
                             try {
-                                facilityUpdates.put(FacilityCol.valueOf(facilityCol), facilityValue);
+                                FacilityCol colEnum = FacilityCol.valueOf(facilityCol);
+                                if (colEnum == FacilityCol.ROBOT_CAPACITY || colEnum == FacilityCol.VEHICLE_CAPACITY) {
+                                    facilityUpdates.put(colEnum, Integer.parseInt(facilityValue));
+                                } else {
+                                    facilityUpdates.put(colEnum, facilityValue);
+                                }
                                 updateFacilityEntry(facilityId, facilityUpdates);
                             } catch (IllegalArgumentException e) {
                                 System.err.println("Invalid column name!");
@@ -331,12 +357,12 @@ public class Project{
 
                                 case 4:
                                     System.out.println("Enter Robot Capacity:");
-                                    facilitySearch.put(FacilityCol.ROBOT_CAPACITY, scanner.nextLine());
+                                    facilitySearch.put(FacilityCol.ROBOT_CAPACITY, Integer.parseInt(scanner.nextLine()));
                                     break;
 
                                 case 5:
                                     System.out.println("Enter Vehicle Capacity:");
-                                    facilitySearch.put(FacilityCol.VEHICLE_CAPACITY, scanner.nextLine());
+                                    facilitySearch.put(FacilityCol.VEHICLE_CAPACITY, Integer.parseInt(scanner.nextLine()));
                                     break;
 
                                 case 6:
@@ -352,21 +378,7 @@ public class Project{
                                     return;
                             }
 
-                            List<Object[]> facilityResults = retrieveFacilityEntry(facilitySearch);
-
-                            if (facilityResults.isEmpty()) {
-                                System.out.println("No facilities found.");
-                            } else {
-                                for (Object[] facility : facilityResults) {
-                                    System.out.println("ID: " + facility[0] +
-                                            ", Address: " + facility[1] +
-                                            ", Phone: " + facility[2] +
-                                            ", Manager: " + facility[3] +
-                                            ", Robot Capacity: " + facility[4] +
-                                            ", Vehicle Capacity: " + facility[5] +
-                                            ", City: " + facility[6]);
-                                }
-                            }
+                            retrieveFacilityEntry(facilitySearch);
                             break;
                         default:
                             System.err.println("Invalid Selection");
@@ -445,19 +457,7 @@ public class Project{
                                     return;
                             }
 
-                            List<Object[]> staffResults = retrieveStaffEntry(staffSearch);
-
-                            if (staffResults.isEmpty()) {
-                                System.out.println("No staff found.");
-                            } else {
-                                for (Object[] staff : staffResults) {
-                                    System.out.println("ID: " + staff[0] +
-                                            ", Name: " + staff[1] +
-                                            ", Phone: " + staff[2] +
-                                            ", Email: " + staff[3] +
-                                            ", Type: " + staff[4]);
-                                }
-                            }
+                            retrieveStaffEntry(staffSearch);
                             break;
                         default:
                             System.err.println("Invalid Selection");
