@@ -15,6 +15,27 @@ public class Project{
     static int nextFacilityId = 0;
     static int nextStaffId = 0;
     static int nextRentalId = 0;
+    static{
+        try {
+            java.sql.ResultSet rs = db_utils.conn.createStatement().executeQuery("SELECT MAX(Fac_ID) FROM Facility");
+            if (rs.next() && rs.getObject(1) != null) {
+                nextFacilityId = rs.getInt(1) + 1;
+            }
+            
+            rs = db_utils.conn.createStatement().executeQuery("SELECT MAX(Emp_ID) FROM Staff");
+            if (rs.next() && rs.getObject(1) != null) {
+                nextStaffId = rs.getInt(1) + 1;
+            }
+
+            rs = db_utils.conn.createStatement().executeQuery("SELECT MAX(Rent_ID) FROM Rental");
+            if (rs.next() && rs.getObject(1) != null) {
+                nextRentalId = rs.getInt(1) + 1;
+            }
+        }
+        catch (SQLException e) {
+            System.err.println("Error initializing IDs: " + e.getMessage());
+        }
+    }
     static NavigableSet<Object[]> facilityEntries = new TreeSet<>(new Comparator<Object[]>() {
         @Override
         public int compare(Object[] a, Object[] b) {
@@ -552,7 +573,9 @@ public class Project{
                             System.out.println("Enter Delivery Date:");
                             String deliveryDate = scanner.nextLine();
 
+                            //TODO!
                             // try{
+                            //     String sql = "UPDATE Transport SET Rent_End_Date = ? WHERE Rent_Item_SN = ? AND Rent_Cust_Ref = ?";
                             //     System.out.println("Robot delivery scheduled.");
                             // }
                             break;
@@ -572,7 +595,11 @@ public class Project{
                             System.out.println("Enter Pickup Date:");
                             String pickupDate = scanner.nextLine();
 
-                            System.out.println("Robot pickup scheduled.");
+                            //TODO!
+                            // try{
+                            //     String sql = "UPDATE Transport SET Rent_End_Date = ? WHERE Rent_Item_SN = ? AND Rent_Cust_Ref = ?";
+                            //     System.out.println("Robot pickup scheduled.");
+                            // }
                             break;
 
                         default:
