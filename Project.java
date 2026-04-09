@@ -496,18 +496,18 @@ public class Project{
                             scanner.nextLine();
 
                             try{
-                                String sql = "INSERT INTO Rental VALUES(?, ?, ?, ?, ?, ?)"
+                                String sql = "INSERT INTO Rental VALUES(?, ?, ?, ?, ?, ?)";
                                 PreparedStatement ps = db_utils.conn.prepareStatement(sql);
                                 ps.setInt(1, nextRentalId++);
                                 ps.setString(2, rentStartDate);
                                 ps.setString(3, rentEndDate);
                                 ps.setDouble(4, rentFee);
-                                ps.setInt(5, rentRobotSerial);
+                                ps.setString(5, rentRobotSerial);
                                 ps.setInt(6, rentCustomerId);
                                 SqlUtils.sqlInsertQuery(ps);
                                 System.out.println("Robot rent successful.");
                             }
-                            catch{
+                            catch(SQLException e) {
                                 System.err.println("Error renting robot: " + e.getMessage());
                             }
                             break;
@@ -524,15 +524,15 @@ public class Project{
                             System.out.println("Enter Return Date:");
                             String returnDate = scanner.nextLine();
                             try{
-                                String sql = "UPDATE Rental SET Rent_End_Date = ? WHERE Rent_Item_SN = ? AND Rent_Cust_Ref = ?"
+                                String sql = "UPDATE Rental SET Rent_End_Date = ? WHERE Rent_Item_SN = ? AND Rent_Cust_Ref = ?";
                                 PreparedStatement ps = db_utils.conn.prepareStatement(sql);
                                 ps.setString(1, returnDate);
-                                ps.setInt(2, returnRobotSerial);
+                                ps.setString(2, returnRobotSerial);
                                 ps.setInt(3, returnCustomerId);
                                 SqlUtils.sqlInsertQuery(ps);
                                 System.out.println("Equipment return registered.");
                             }
-                            catch{
+                            catch(SQLException e){
                                 System.err.println("Error returning robot: " + e.getMessage());
                             }
                             break;
@@ -551,10 +551,10 @@ public class Project{
 
                             System.out.println("Enter Delivery Date:");
                             String deliveryDate = scanner.nextLine();
-                            
-                            try{
-                                System.out.println("Robot delivery scheduled.");
-                            }
+
+                            // try{
+                            //     System.out.println("Robot delivery scheduled.");
+                            // }
                             break;
 
                         case 4:
