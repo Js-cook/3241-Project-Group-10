@@ -14,6 +14,7 @@ public class Project{
 
     static int nextFacilityId = 0;
     static int nextStaffId = 0;
+    static int nextRentalId = 0;
     static NavigableSet<Object[]> facilityEntries = new TreeSet<>(new Comparator<Object[]>() {
         @Override
         public int compare(Object[] a, Object[] b) {
@@ -494,7 +495,21 @@ public class Project{
                             double rentFee = scanner.nextDouble();
                             scanner.nextLine();
 
-                            System.out.println("Robot rent successful.");
+                            try{
+                                String sql = "INSERT INTO Rental VALUES(?, ?, ?, ?, ?, ?)"
+                                PreparedStatement ps = db_utils.conn.prepareStatement(sql);
+                                ps.setInt(1, nextRentalId++);
+                                ps.setString(2, rentStartDate);
+                                ps.setString(3, rentEndDate);
+                                ps.setDouble(4, rentFee);
+                                ps.setInt(5, rentRobotSerial);
+                                ps.setInt(6, rentCustomerId);
+                                SqlUtils.sqlInsertQuery(ps);
+                                System.out.println("Robot rent successful.");
+                            }
+                            catch{
+                                System.err.println("Error renting robot: " + e.getMessage());
+                            }
                             break;
 
                         case 2:
@@ -508,8 +523,18 @@ public class Project{
 
                             System.out.println("Enter Return Date:");
                             String returnDate = scanner.nextLine();
-
-                            System.out.println("Equipment return registered.");
+                            try{
+                                String sql = "UPDATE Rental SET Rent_End_Date = ? WHERE Rent_Item_SN = ? AND Rent_Cust_Ref = ?"
+                                PreparedStatement ps = db_utils.conn.prepareStatement(sql);
+                                ps.setString(1, returnDate);
+                                ps.setInt(2, returnRobotSerial);
+                                ps.setInt(3, returnCustomerId);
+                                SqlUtils.sqlInsertQuery(ps);
+                                System.out.println("Equipment return registered.");
+                            }
+                            catch{
+                                System.err.println("Error returning robot: " + e.getMessage());
+                            }
                             break;
 
                         case 3:
@@ -526,8 +551,10 @@ public class Project{
 
                             System.out.println("Enter Delivery Date:");
                             String deliveryDate = scanner.nextLine();
-
-                            System.out.println("Robot delivery scheduled.");
+                            
+                            try{
+                                System.out.println("Robot delivery scheduled.");
+                            }
                             break;
 
                         case 4:
