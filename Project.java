@@ -67,56 +67,42 @@ public class Project{
         Object val = updateValues.values().toArray(new Object[1])[0];
 
         try{
+            String sql = "";
+            boolean isInt = false;
             switch(selectedCol){
                 case ADDRESS:
-                    String sql = "UPDATE Facility";
+                    sql = "UPDATE Facility SET Fac_Address=? WHERE Fac_ID=?";
                     break;
                 case PHONE:
+                    sql = "UPDATE Facility SET Fac_Phone=? WHERE Fac_ID=?";
                     break;
                 case MANAGER_NAME:
+                    sql = "UPDATE Facility SET Fac_Manager_Name=? WHERE Fac_ID=?";
                     break;
                 case ROBOT_CAPACITY:
+                    sql = "UPDATE Facility SET Fac_Robot_Capacity=? WHERE Fac_ID=?";
+                    isInt = true;
                     break;
                 case VEHICLE_CAPACITY:
+                    sql = "UPDATE Facility SET Fac_Vehicle_Capacity=? WHERE Fac_ID=?";
+                    isInt = true;
                     break;
                 case CITY:
+                    sql = "UPDATE Facility SET Fac_City=? WHERE Fac_ID=?";
                     break;
-                default:
-
             }
-            // String sql = "UPDATE Facility SET Fac_Address=?, Fac_Phone=?, Fac_Manager_Name=?, Fac_Robot_Capacity=?, Fac_Vehicle_Capacity=?, Fac_City=? WHERE Fac_ID=?;";
-            // PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
+            if(isInt){
+                stmt.setInt(1, (Integer) val);
+            } else {
+                stmt.setString(1, (String)val);
+            }
+            stmt.setInt(2, facilityId);
+
+            stmt.executeUpdate();
         } catch (SQLException e){
             System.out.println(e.getMessage());
         }
-
-        
-        // Object[] entryToUpdate = null;
-        
-        // // Find the entry with the given ID
-        // for (Object[] entry : facilityEntries) {
-        //     if (((Integer) entry[0]).intValue() == facilityId) {
-        //         entryToUpdate = entry;
-        //         break;
-        //     }
-        // }
-        
-        // if (entryToUpdate != null) {
-        //     // Remove the old entry
-        //     facilityEntries.remove(entryToUpdate);
-            
-        //     // Update the values
-        //     for (Map.Entry<FacilityCol, Object> update : updateValues.entrySet()) {
-        //         int colIndex = update.getKey().ordinal();
-        //         entryToUpdate[colIndex] = update.getValue();
-        //     }
-            
-        //     // Add the updated entry back
-        //     facilityEntries.add(entryToUpdate);
-        //     System.out.println("Facility " + facilityId + " updated successfully.");
-        // } else {
-        //     System.err.println("Facility with ID " + facilityId + " not found.");
-        // }
     }
 
     private static void deleteFacilityEntry(int id){
