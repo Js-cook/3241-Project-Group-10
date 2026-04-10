@@ -22,7 +22,7 @@ public class Project{
                 nextFacilityId = rs.getInt(1) + 1;
             }
             
-            rs = db_utils.conn.createStatement().executeQuery("SELECT MAX(Emp_ID) FROM Staff");
+            rs = db_utils.conn.createStatement().executeQuery("SELECT MAX(Emp_ID) FROM Staff_Member");
             if (rs.next() && rs.getObject(1) != null) {
                 nextStaffId = rs.getInt(1) + 1;
             }
