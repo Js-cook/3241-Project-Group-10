@@ -367,7 +367,7 @@ public class Project{
 
             System.out.println("\n=== Rental Home Robot DBMS ===");
             System.out.println("Select a Resource to Manage:");
-            System.out.println("1. Facilities\n2. Staff\n3. Robots\n0. Exit");
+            System.out.println("1. Facilities\n2. Staff\n3. Robots\n4. Reports\n0. Exit");
             int selection = scanner.nextInt();
             scanner.nextLine(); // Consume newline
             
@@ -651,7 +651,7 @@ public class Project{
                                 ps.setString(2, deliveryRentId);
                                 ps.setInt(3, deliveryCustomerId);
                                 SqlUtils.sqlInsertQuery(ps);
-                                sql = "INSERT INTO Transport VALUES (?, ?);";
+                                sql = "INSERT INTO Transports VALUES (?, ?);";
                                 ps = db_utils.conn.prepareStatement(sql);
                                 ps.setString(1, deliveryRobotSerial);
                                 ps.setString(2, deliveryVehicle);
