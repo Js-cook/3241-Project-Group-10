@@ -539,17 +539,22 @@ public class Project{
                             int returnCustomerId = scanner.nextInt();
                             scanner.nextLine();
 
+                            System.out.println("Enter Rent ID:");
+                            String returnRentId = scanner.nextLine();
+
                             System.out.println("Enter Robot Serial Number:");
                             String returnRobotSerial = scanner.nextLine();
 
                             System.out.println("Enter Return Date:");
                             String returnDate = scanner.nextLine();
+
                             try{
-                                String sql = "UPDATE Rental SET Rent_End_Date = ? WHERE Rent_Item_SN = ? AND Rent_Cust_Ref = ?";
+                                String sql = "UPDATE Rental SET Rent_End_Date = ? WHERE Rent_Item_SN = ? AND Rent_Cust_Ref = ? AND Rent_ID = ?";
                                 PreparedStatement ps = db_utils.conn.prepareStatement(sql);
                                 ps.setString(1, returnDate);
                                 ps.setString(2, returnRobotSerial);
                                 ps.setInt(3, returnCustomerId);
+                                ps.setString(4, returnRentId);
                                 SqlUtils.sqlInsertQuery(ps);
                                 System.out.println("Equipment return registered.");
                             }
@@ -567,17 +572,33 @@ public class Project{
                             System.out.println("Enter Robot Serial Number:");
                             String deliveryRobotSerial = scanner.nextLine();
 
+                            System.out.println("Enter Rent ID:");
+                            String deliveryRentId = scanner.nextLine();
+
                             System.out.println("Enter Driverless Vehicle Serial Number:");
                             String deliveryVehicle = scanner.nextLine();
 
                             System.out.println("Enter Delivery Date:");
                             String deliveryDate = scanner.nextLine();
 
-                            //TODO!
-                            // try{
-                            //     String sql = "UPDATE Transport SET Rent_End_Date = ? WHERE Rent_Item_SN = ? AND Rent_Cust_Ref = ?";
-                            //     System.out.println("Robot delivery scheduled.");
-                            // }
+                            //TODO! delivery date can be rental beginning date using robot serial num and cust_id, robot and driverless for transport
+                            try{
+                                String sql = "UPDATE Rental SET Rent_Start_Date = ? WHERE Rent_ID = ? AND Rent_Cust_Ref = ?";
+                                PreparedStatement ps = db_utils.conn.prepareStatement(sql);
+                                ps.setString(1, deliveryDate);
+                                ps.setString(2, deliveryRentId);
+                                ps.setInt(3, deliveryCustomerId);
+                                SqlUtils.sqlInsertQuery(ps);
+                                sql = "INSERT INTO Transport VALUES (?, ?);";
+                                ps = db_utils.conn.prepareStatement(sql);
+                                ps.setString(1, deliveryRobotSerial);
+                                ps.setString(2, deliveryVehicle);
+                                SqlUtils.sqlInsertQuery(ps);
+                                System.out.println("Robot delivery scheduled.");
+                            }
+                            catch(SQLException e){
+                                System.err.println("Error returning robot: " + e.getMessage());
+                            }
                             break;
 
                         case 4:
@@ -595,11 +616,19 @@ public class Project{
                             System.out.println("Enter Pickup Date:");
                             String pickupDate = scanner.nextLine();
 
-                            //TODO!
-                            // try{
-                            //     String sql = "UPDATE Transport SET Rent_End_Date = ? WHERE Rent_Item_SN = ? AND Rent_Cust_Ref = ?";
-                            //     System.out.println("Robot pickup scheduled.");
-                            // }
+                            try{
+                                String sql = "UPDATE Rental SET Rent_Veh_Ref = ? WHERE Rent_Cust_ID = ? AND Rent_Cust_Ref = ?";
+                                PreparedStatement ps = db_utils.conn.prepareStatement(sql);
+                                ps.setString(1, pickupVehicle);
+                                ps.setInt(2, pickupCustomerId);
+                                ps.setString(3, pickupRobotSerial);
+                                SqlUtils.sqlInsertQuery(ps);
+                                System.out.println("Equipment return registered.");
+                                System.out.println("Robot pickup scheduled.");
+                            }
+                            catch(SQLException e){
+                                System.err.println("Error returning robot: " + e.getMessage());
+                            }
                             break;
 
                         default:
