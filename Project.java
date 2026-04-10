@@ -679,13 +679,17 @@ public class Project{
                             String pickupDate = scanner.nextLine();
 
                             try{
-                                String sql = "UPDATE Rental SET Rent_Veh_Ref = ? WHERE Rent_Cust_ID = ? AND Rent_Cust_Ref = ?";
+                                String sql = "UPDATE Rental SET Rent_Start_Date = ? WHERE Rent_Cust_Ref = ? AND Rent_Item_SN = ?";
                                 PreparedStatement ps = db_utils.conn.prepareStatement(sql);
-                                ps.setString(1, pickupVehicle);
+                                ps.setString(1, pickupDate);
                                 ps.setInt(2, pickupCustomerId);
                                 ps.setString(3, pickupRobotSerial);
                                 SqlUtils.sqlInsertQuery(ps);
-                                System.out.println("Equipment return registered.");
+                                sql = "UPDATE Driverless_Vehicle SET Veh_Status = ? WHERE Veh_Serial_Num = ?";
+                                ps = db_utils.conn.prepareStatement(sql);
+                                ps.setString(1, "Available");
+                                ps.setString(2, pickupVehicle);
+                                SqlUtils.sqlInsertQuery(ps);
                                 System.out.println("Robot pickup scheduled.");
                             }
                             catch(SQLException e){
