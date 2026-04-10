@@ -9,6 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Comparator;
 
+// TO RUN JAVA IN TERMINAL:
+// Compile:
+// javac -cp "lib/*" -d bin Project.java SqlUtils.java 
+//Run:
+//java -cp "bin:lib/*" Project
+
 public class Project{
     static SqlUtils db_utils = new SqlUtils("RobotCompany.db");
 
