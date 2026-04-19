@@ -287,7 +287,7 @@ public class Project{
 
     public static void popularRobotReport(){
         try{
-            String sql = "SELECT rb.Rob_Serial_Num, rb.Rob_Model_Ref, COUNT(*) AS num_rentals, SUM(JULIANDAY(rt.Rent_End_Date)- ULIANDAY(rt.Rent_Start_Date)) AS total_rented_days FROM Robot AS rb JOIN Rent AS rt ON rt.Rent_Item_SN = rb.Rob_Serial_Num GROUP BY rb.Rob_Serial_Num, rb.Rob_Model_Ref ORDER BY total_rented_days DESC; ";
+            String sql = "SELECT rb.Rob_Serial_Num, rb.Rob_Model_Ref, COUNT(*) AS num_rentals, SUM(JULIANDAY(rt.Rent_End_Date)-JULIANDAY(rt.Rent_Start_Date)) AS total_rented_days FROM Robot AS rb JOIN Rental AS rt ON rt.Rent_Item_SN = rb.Rob_Serial_Num GROUP BY rb.Rob_Serial_Num, rb.Rob_Model_Ref ORDER BY total_rented_days DESC LIMIT 1;";
             PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
             SqlUtils.sqlSelectQuery(stmt);
         } catch(SQLException e){
@@ -297,7 +297,7 @@ public class Project{
 
     public static void popularManufacturerReport(){
         try{
-            String sql = "SELECT Mfr_Name FROM Rental JOIN Robot ON  Rent_Item_SN = Rob_Serial_Num JOIN Manufacturer ON Rob_Mfr_Ref= Mfr_Name GROUP BY Mfr_Name ORDER BY COUNT(Rent_ID) DESC LIMIT 1;";
+            String sql = "SELECT Mfr_Name, COUNT(Rent_ID) AS num_rentals FROM Rental JOIN Robot ON  Rent_Item_SN = Rob_Serial_Num JOIN Manufacturer ON Rob_Mfr_Ref= Mfr_Name GROUP BY Mfr_Name ORDER BY COUNT(Rent_ID) DESC LIMIT 1;";
             PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
             SqlUtils.sqlSelectQuery(stmt);
         } catch(SQLException e){
@@ -307,7 +307,7 @@ public class Project{
 
     public static void popularDriverlessCarReport(){
          try{
-            String sql = "SELECT Veh_Serial_Num, SUM(Cust_Facility_Distance)*2 FROM Driverless_Vehicle LEFT JOIN Rental ON Veh_Serial_Num = Rent_Veh_Ref LEFT JOIN Customer ON Rent_Cust_Ref = Cust_ID GROUP BY Veh_Serial_Num ORDER BY COUNT(Rent_ID) DESC LIMIT 1;";
+            String sql = "SELECT Veh_Serial_Num, SUM(Cust_Facility_Distance)*2, COUNT(Rent_ID) AS num_rentals FROM Driverless_Vehicle JOIN Rental ON Veh_Serial_Num = Rent_Item_SN JOIN Customer ON Rent_Cust_Ref = Cust_ID GROUP BY Veh_Serial_Num ORDER BY COUNT(Rent_ID) DESC LIMIT 1;";
             PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
             SqlUtils.sqlSelectQuery(stmt);
         } catch(SQLException e){
@@ -327,7 +327,7 @@ public class Project{
 
     public static void robotsByType(int year){
         try {
-            String sql = "SELECT Rob_Mfr_Ref, RM_Descriptive_Name, Rob_Year FROM Robot JOIN Robot_Model ON Rob_Model_Ref = RM_Model_ID WHERE AND Rob_Year < ?;";
+            String sql = "SELECT Rob_Mfr_Ref, RM_Descriptive_Name, Rob_Year FROM Robot JOIN Robot_Model ON Rob_Model_Ref = RM_Model_ID WHERE Rob_Year < ?;";
             PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
             stmt.setInt(1, year);
             SqlUtils.sqlSelectQuery(stmt);
@@ -345,7 +345,7 @@ public class Project{
 
             System.out.println("\n=== Rental Home Robot DBMS ===");
             System.out.println("Select a Resource to Manage:");
-            System.out.println("1. Facilities\n2. Staff\n3. Robots\n0. Exit");
+            System.out.println("1. Facilities\n2. Staff\n3. Robots\n4. Reports\n0. Exit");
             int selection = scanner.nextInt();
             scanner.nextLine(); // Consume newline
             

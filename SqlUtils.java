@@ -29,9 +29,9 @@ public class SqlUtils {
             ResultSet rs = stmt.executeQuery();
             ResultSetMetaData meta = rs.getMetaData();
             int cols = meta.getColumnCount();
-            for(int i = 1; i < cols; i++){
+            for(int i = 1; i <= cols; i++){
                 String val = meta.getColumnName(i);
-                System.out.println(val);
+                System.out.print(val);
                 if(i < cols)
                     System.out.print(",  ");
             }
