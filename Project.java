@@ -374,6 +374,7 @@ public class Project{
             System.out.println("\n=== Rental Home Robot DBMS ===");
             System.out.println("Select a Resource to Manage:");
             System.out.println("1. Facilities\n2. Staff\n3. Robots\n4. Reports\n0. Exit");
+            System.out.println("\nSelection: ");
             int selection = scanner.nextInt();
             scanner.nextLine(); // Consume newline
             
@@ -381,6 +382,7 @@ public class Project{
                 case 1:
                     System.out.println("\n--- Facility Management ---");
                     System.out.println("1. Create\n2. Update\n3. Delete\n4. Retrieve");
+                    System.out.println("\nSelection: ");
                     int facilitySelection = scanner.nextInt();
                     scanner.nextLine();
                     switch (facilitySelection) {
@@ -478,6 +480,7 @@ public class Project{
                 case 2:
                     System.out.println("\n--- Staff Management ---");
                     System.out.println("1. Create\n2. Update\n3. Delete\n4. Retrieve");
+                    System.out.println("\nSelection: ");
                     int staffSelection = scanner.nextInt();
                     scanner.nextLine();
                     switch (staffSelection) {
@@ -560,6 +563,7 @@ public class Project{
                     System.out.println("2. Return Equipment");
                     System.out.println("3. Delivery of Robots");
                     System.out.println("4. Pickup of Robots");
+                    System.out.println("\nSelection: ");
                     int robotSelection = scanner.nextInt();
                     scanner.nextLine();
 
@@ -716,6 +720,7 @@ public class Project{
                     System.out.println("4. Popular Driverless Car");
                     System.out.println("5. Robots Checked Out");
                     System.out.println("6. Robots by Type");
+                    System.out.println("\nSelection: ");
                     int reportSelection = scanner.nextInt();
                     scanner.nextLine();
 
