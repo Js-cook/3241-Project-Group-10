@@ -335,7 +335,7 @@ public class Project{
 
     public static void popularDriverlessCarReport(){
          try{
-            String sql = "SELECT Veh_Serial_Num, SUM(Cust_Facility_Distance)*2, COUNT(Rent_ID) AS num_rentals FROM Driverless_Vehicle JOIN Rental ON Veh_Serial_Num = Rent_Item_SN JOIN Customer ON Rent_Cust_Ref = Cust_ID GROUP BY Veh_Serial_Num ORDER BY COUNT(Rent_ID) DESC LIMIT 1;";
+            String sql = "SELECT Veh_Serial_Num, SUM(Cust_Facility_Distance)*2, COUNT(Rent_ID) AS num_rentals FROM Driverless_Vehicle  JOIN Transports ON Veh_Serial_Num = Trans_Veh_Serial_Num_Ref LEFT JOIN Rental ON Trans_Rob_Serial_Num_Ref = Rent_Item_SN JOIN Customer ON Rent_Cust_Ref = Cust_ID GROUP BY Veh_Serial_Num ORDER BY COUNT(Rent_ID) DESC LIMIT 1;";
             PreparedStatement stmt = db_utils.conn.prepareStatement(sql);
             SqlUtils.sqlSelectQuery(stmt);
         } catch(SQLException e){
